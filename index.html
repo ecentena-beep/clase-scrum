@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Clase de Scrum · Sección Sistemas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@500;700&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap top-in">
+    <div>
+      <div class="eyebrow">Sección Sistemas · Capacitación</div>
+      <h1>Metodologías ágiles y Scrum</h1>
+    </div>
+    <div class="status">
+      <span class="chip clock" id="clock" hidden><span class="k">Ejercicio</span> <span id="clockTxt"></span></span>
+      <span class="chip who" id="who" hidden><span class="avatar" id="whoIni"></span><span id="whoTxt"></span></span>
+      <button class="link-btn" id="salir" hidden>Salir</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- Falta configurar Firebase -->
+  <section class="screen" id="s-config" hidden>
+    <div class="card narrow">
+      <h2>Falta configurar el sitio</h2>
+      <p>Para que el equipo pueda conectarse, completá los datos de Firebase en el archivo <code>firebase-config.js</code>. Los pasos están en el archivo <code>README.md</code>.</p>
+    </div>
+  </section>
+
+  <!-- 1. Ingreso -->
+  <section class="screen" id="s-login" hidden>
+    <form class="card narrow" id="loginForm" novalidate>
+      <div class="eyebrow">Ingreso a la clase</div>
+      <h2>Ingresá tus datos</h2>
+      <div class="two">
+        <label class="f" for="fNombre">Nombre
+          <input id="fNombre" autocomplete="given-name" required maxlength="40">
+        </label>
+        <label class="f" for="fApellido">Apellido
+          <input id="fApellido" autocomplete="family-name" required maxlength="40">
+        </label>
+      </div>
+      <label class="f" for="fCuenta">Cuenta <span class="hint">(usuario o correo institucional)</span>
+        <input id="fCuenta" autocomplete="username" required maxlength="80">
+      </label>
+      <label class="f" for="fClase">Código de la clase
+        <input id="fClase" required maxlength="40" pattern="[a-z0-9-]+">
+      </label>
+      <details id="docBox">
+        <summary>Soy el docente</summary>
+        <label class="f" for="fClave">Clave de docente
+          <input id="fClave" type="password" autocomplete="off">
+        </label>
+      </details>
+      <p class="err" id="loginErr" role="alert"></p>
+      <button class="btn" id="loginBtn" type="submit">Ingresar</button>
+    </form>
+  </section>
+
+  <!-- 2. Sala de espera -->
+  <section class="screen" id="s-espera" hidden>
+    <div class="espera">
+      <div class="card">
+        <div class="eyebrow" id="esperaEyebrow">Sala de espera</div>
+        <h2 id="esperaTitulo">Esperando que comience la clase</h2>
+        <p class="muted" id="esperaTexto"></p>
+        <div class="doc-ctrl" id="docCtrl" hidden>
+          <label class="f inline" for="fMax">Máximo de personas por equipo
+            <select id="fMax"><option>3</option><option>4</option><option selected>5</option><option>6</option></select>
+          </label>
+          <p class="preview" id="preview"></p>
+          <button class="btn big-btn" id="iniciar">Iniciar clase</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Conectados</div>
+        <p class="count"><span class="big" id="cuantos">0</span> <span class="muted" id="cuantosTxt">personas</span></p>
+        <ul class="people" id="gente"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Clase -->
+  <section class="screen" id="s-clase" hidden>
+    <div class="miequipo" id="miEquipo"></div>
+
+    <nav class="tabs" role="tablist" aria-label="Secciones de la clase">
+      <button class="tab" role="tab" data-tab="ejercicio" id="t-ejercicio" aria-controls="p-ejercicio">Ejercicio</button>
+      <button class="tab" role="tab" data-tab="repaso" id="t-repaso" aria-controls="p-repaso">Repaso</button>
+      <button class="tab" role="tab" data-tab="comun" id="t-comun" aria-controls="p-comun">Puesta en común</button>
+      <button class="tab" role="tab" data-tab="quiz" id="t-quiz" aria-controls="p-quiz">Cuestionario</button>
+      <button class="tab" role="tab" data-tab="coord" id="t-coord" aria-controls="p-coord" hidden>Coordinación</button>
+    </nav>
+
+    <!-- Ejercicio -->
+    <div class="panel" id="p-ejercicio" role="tabpanel" aria-labelledby="t-ejercicio">
+      <div class="sec">
+        <div class="eyebrow">Caso</div>
+        <h2>Planifiquen el primer sprint de la app de reservas del club deportivo</h2>
+        <p>Sprint de 2 semanas, capacidad de <b>10 puntos</b>. Talles: S = 1, M = 3, L = 5. Todo el equipo ve los cambios en vivo.</p>
+        <div class="steps" id="steps"></div>
+      </div>
+      <div class="segs" id="verEquipo" hidden></div>
+      <div class="board">
+        <div class="sec">
+          <div class="eyebrow">Product Backlog del equipo</div>
+          <ol class="cards" id="cards"></ol>
+        </div>
+        <div class="side">
+          <div class="meter">
+            <div class="eyebrow">Capacidad del sprint</div>
+            <div><span class="big" id="used">0</span> <span class="muted">de 10 puntos</span></div>
+            <div class="cap" id="capBar" aria-hidden="true"></div>
+            <p class="msg" id="capMsg"></p>
+          </div>
+          <div class="goal">
+            <label class="f" for="objetivo">Objetivo del Sprint</label>
+            <textarea id="objetivo" maxlength="280" placeholder="Por ejemplo: que un socio pueda…"></textarea>
+            <span class="saved" id="savedMsg"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repaso -->
+    <div class="panel" id="p-repaso" role="tabpanel" aria-labelledby="t-repaso" hidden>
+      <p class="lead">Trabajar de forma ágil es avanzar en ciclos cortos, entregar algo usable en cada uno y ajustar con lo aprendido. Scrum es un marco concreto para hacerlo.</p>
+      <div class="sec">
+        <div class="eyebrow">Manifiesto Ágil · 2001</div>
+        <h2>Cuatro valores</h2>
+        <div class="values">
+          <div><b>Individuos e interacciones</b><span>por sobre</span><i>procesos y herramientas</i></div>
+          <div><b>Software que funciona</b><span>por sobre</span><i>documentación exhaustiva</i></div>
+          <div><b>Colaboración con el cliente</b><span>por sobre</span><i>negociación contractual</i></div>
+          <div><b>Respuesta ante el cambio</b><span>por sobre</span><i>seguir un plan</i></div>
+        </div>
+        <p class="muted">Lo de la derecha tiene valor; lo de la izquierda se valora más.</p>
+      </div>
+      <div class="sec">
+        <div class="eyebrow">Empirismo</div>
+        <h2>Tres pilares</h2>
+        <div class="grid3">
+          <div class="box"><h3>Transparencia</h3><p>El trabajo y el avance están a la vista de todos.</p></div>
+          <div class="box"><h3>Inspección</h3><p>Se revisa seguido el avance para detectar desvíos.</p></div>
+          <div class="box"><h3>Adaptación</h3><p>Si algo se desvía, se corrige lo antes posible.</p></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="eyebrow">El Equipo Scrum · 10 personas o menos</div>
+        <h2>Tres responsabilidades</h2>
+        <div class="grid3">
+          <div class="box"><h3>Product Owner</h3><p>Maximiza el valor del producto y ordena el Product Backlog. Es una persona, no un comité.</p></div>
+          <div class="box"><h3>Scrum Master</h3><p>Cuida la efectividad del equipo, enseña Scrum y quita trabas. Sirve al equipo; no lo dirige.</p></div>
+          <div class="box"><h3>Developers</h3><p>Construyen el incremento, arman el plan del sprint y responden por la calidad.</p></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="eyebrow">Eventos</div>
+        <h2>Los cinco eventos</h2>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Evento</th><th>Para qué sirve</th><th>Tiempo máximo*</th></tr></thead>
+            <tbody>
+              <tr><td><b>Sprint</b></td><td>Contiene todo el trabajo y entrega al menos un incremento</td><td class="n">1 mes</td></tr>
+              <tr><td><b>Sprint Planning</b></td><td>Acordar el Objetivo del Sprint y el plan</td><td class="n">8 horas</td></tr>
+              <tr><td><b>Daily Scrum</b></td><td>Los Developers revisan el avance y ajustan el plan del día</td><td class="n">15 minutos</td></tr>
+              <tr><td><b>Sprint Review</b></td><td>Mostrar el incremento y recibir devolución</td><td class="n">4 horas</td></tr>
+              <tr><td><b>Retrospectiva</b></td><td>Mejorar la forma de trabajar del equipo</td><td class="n">3 horas</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted">* Para un sprint de 1 mes; con sprints más cortos, los eventos duran menos.</p>
+      </div>
+      <div class="sec">
+        <div class="eyebrow">Artefactos</div>
+        <h2>Tres artefactos y sus compromisos</h2>
+        <div class="grid3">
+          <div class="box"><h3>Product Backlog</h3><p>Lista ordenada de todo lo que puede mejorar el producto.</p><span class="tag">Compromiso</span><p><b>Objetivo del Producto</b></p></div>
+          <div class="box"><h3>Sprint Backlog</h3><p>Lo elegido para el sprint y el plan para hacerlo.</p><span class="tag">Compromiso</span><p><b>Objetivo del Sprint</b></p></div>
+          <div class="box"><h3>Incremento</h3><p>Resultado terminado y usable que suma a lo anterior.</p><span class="tag">Compromiso</span><p><b>Definición de Terminado</b></p></div>
+        </div>
+      </div>
+      <div class="sec">
+        <div class="eyebrow">Valores de Scrum</div>
+        <p class="lead">Compromiso · Foco · Apertura · Respeto · Coraje</p>
+        <p class="muted">Para profundizar: <a href="https://scrumguides.org" target="_blank" rel="noopener">la Guía Scrum 2020</a>, breve y disponible en español.</p>
+      </div>
+    </div>
+
+    <!-- Puesta en común -->
+    <div class="panel" id="p-comun" role="tabpanel" aria-labelledby="t-comun" hidden>
+      <div class="sec">
+        <div class="eyebrow">Paso 4 · Compartir</div>
+        <h2>Lo que planificó cada equipo</h2>
+        <p class="muted">Comparen los objetivos y lo que quedó afuera. ¿El objetivo ayudó a decidir?</p>
+      </div>
+      <div class="groups" id="groups"></div>
+      <details class="ref" id="refBox">
+        <summary>Ver una respuesta de referencia</summary>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Tarjeta</th><th>Talle</th><th>¿Entra?</th></tr></thead>
+            <tbody>
+              <tr><td>C. Ingresar con el número de socio</td><td class="n">S · 1</td><td>Sí</td></tr>
+              <tr><td>A. Ver los horarios libres</td><td class="n">M · 3</td><td>Sí</td></tr>
+              <tr><td>B. Reservar una cancha</td><td class="n">M · 3</td><td>Sí</td></tr>
+              <tr><td>D. Confirmación por correo</td><td class="n">S · 1</td><td>Sí</td></tr>
+              <tr><td>E. Cancelar una reserva</td><td class="n">S · 1</td><td>Sí</td></tr>
+              <tr><td>G. Historial de reservas</td><td class="n">S · 1</td><td>Opcional</td></tr>
+              <tr><td>F. Pagar en línea</td><td class="n">L · 5</td><td>No</td></tr>
+              <tr><td>H. Panel de ocupación</td><td class="n">L · 5</td><td>No</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="ref-p">Objetivo de referencia: <b>que un socio pueda reservar y cancelar una cancha desde el celular.</b> El pago en línea es valioso, pero sin poder reservar no sirve: el orden también depende de las dependencias.</p>
+      </details>
+    </div>
+
+    <!-- Cuestionario -->
+    <div class="panel" id="p-quiz" role="tabpanel" aria-labelledby="t-quiz" hidden>
+      <div class="quiz">
+        <div class="sec">
+          <div class="eyebrow">8 preguntas</div>
+          <h2>Mini cuestionario</h2>
+          <form id="quizForm" class="qs"></form>
+        </div>
+        <aside class="res" id="quizRes"></aside>
+      </div>
+    </div>
+
+    <!-- Coordinación (solo docente) -->
+    <div class="panel" id="p-coord" role="tabpanel" aria-labelledby="t-coord" hidden>
+      <div class="card">
+        <div class="eyebrow">Reloj del ejercicio</div>
+        <div class="row" id="pasoBtns"></div>
+        <div class="row"><button class="btn ghost" id="pararReloj">Detener reloj</button></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Equipos</div>
+        <p class="muted" id="equiposResumen"></p>
+        <div class="groups" id="equiposLista"></div>
+        <div class="row">
+          <label class="f inline" for="fMax2">Máximo por equipo
+            <select id="fMax2"><option>3</option><option>4</option><option>5</option><option>6</option></select>
+          </label>
+          <button class="btn ghost" id="rearmar">Rearmar equipos</button>
+          <button class="btn warn" id="limpiar">Borrar tableros</button>
+        </div>
+        <p class="hint" id="coordHint"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
