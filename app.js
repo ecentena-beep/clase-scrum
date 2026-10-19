@@ -306,6 +306,7 @@ async function guardarGrupo(gid, remoto, local) {
 
 function renderEjercicio() {
   if (!S.sala || S.sala.estado !== "iniciada") return;
+  if (S.arrastrando) { S.renderPendiente = true; return; }
   const p = S.sala.paso | 0;
   $("#steps").innerHTML = STEPS.map((s, i) => `<div class="step${p === i + 1 ? " on" : ""}"><b>${i + 1}. ${s.n}</b><span class="muted">${s.min} min · ${s.who}</span></div>`).join("");
   const gid = equipoActivo();
@@ -318,8 +319,8 @@ function renderEjercicio() {
   const used = g.elegidas.reduce((s, id) => s + (PTS[g.talles[id]] || 0), 0);
   $("#cards").innerHTML = g.orden.map((id, i) => {
     const st = STORY[id], t = g.talles[id], sel = g.elegidas.includes(id);
-    return `<li class="card-h${sel ? " sel" : ""}">
-      <div class="rank">${i + 1}</div>
+    return `<li class="card-h${sel ? " sel" : ""}" data-id="${id}">
+      <div class="rank" title="Arrastrá para reordenar"><span class="grip" aria-hidden="true">⋮⋮</span>${i + 1}</div>
       <div class="story"><div class="st-t">${id} · ${esc(st.t)}</div><p>${esc(st.h)}</p></div>
       <div class="ctrls">
         <div class="move"><button data-act="up" data-id="${id}" ${i === 0 ? "disabled" : ""} aria-label="Subir ${id}">↑</button><button data-act="down" data-id="${id}" ${i === IDS.length - 1 ? "disabled" : ""} aria-label="Bajar ${id}">↓</button></div>
@@ -337,6 +338,52 @@ function renderEjercicio() {
   const ta = $("#objetivo"); if (document.activeElement !== ta) ta.value = g.objetivo;
 }
 $("#verEquipo").addEventListener("click", e => { const b = e.target.closest("[data-g]"); if (b) { S.verEq = b.dataset.g; renderEjercicio(); } });
+
+/* Arrastrar y soltar tarjetas (mouse y táctil) */
+(function () {
+  const list = $("#cards");
+  let drag = null; // {id, el, ghost, startY, offsetY, moved}
+  function cardAt(y) {
+    return [...list.querySelectorAll(".card-h")].find(c => { const r = c.getBoundingClientRect(); return y >= r.top && y <= r.bottom; });
+  }
+  function start(e, pt) {
+    const card = e.target.closest(".card-h"); if (!card || !equipoActivo()) return;
+    if (e.target.closest("button, input, label, textarea")) return;
+    drag = { id: card.dataset.id, el: card, startY: pt.clientY, moved: false, ghost: null, offsetY: pt.clientY - card.getBoundingClientRect().top };
+    if (e.pointerType !== "mouse") e.preventDefault();
+  }
+  function move(e, pt) {
+    if (!drag) return;
+    if (!drag.moved) { if (Math.abs(pt.clientY - drag.startY) < 6) return; drag.moved = true;
+      const g = drag.el.cloneNode(true); g.className += " ghost"; g.style.width = drag.el.offsetWidth + "px";
+      document.body.append(g); drag.ghost = g; drag.el.classList.add("placeholder"); S.arrastrando = true; }
+    e.preventDefault();
+    drag.ghost.style.top = (pt.clientY - drag.offsetY) + "px"; drag.ghost.style.left = drag.el.getBoundingClientRect().left + "px";
+    const over = cardAt(pt.clientY);
+    if (over && over !== drag.el) {
+      const r = over.getBoundingClientRect();
+      if (pt.clientY < r.top + r.height / 2) list.insertBefore(drag.el, over); else list.insertBefore(drag.el, over.nextSibling);
+    }
+    const edge = 60, vh = window.innerHeight;
+    if (pt.clientY < edge) window.scrollBy(0, -8); else if (pt.clientY > vh - edge) window.scrollBy(0, 8);
+  }
+  function end() {
+    if (!drag) return;
+    const d = drag; drag = null;
+    if (!d.moved) return;
+    d.ghost.remove(); d.el.classList.remove("placeholder");
+    S.arrastrando = false;
+    const gid = equipoActivo(); if (!gid) { renderEjercicio(); return; }
+    const nuevo = [...list.querySelectorAll(".card-h")].map(c => c.dataset.id);
+    const g = grupo(gid);
+    if (nuevo.join() !== g.orden.join()) guardarGrupo(gid, { orden: nuevo }, x => (x.orden = nuevo));
+    else if (S.renderPendiente) { S.renderPendiente = false; renderEjercicio(); }
+  }
+  list.addEventListener("pointerdown", e => start(e, e));
+  window.addEventListener("pointermove", e => move(e, e), { passive: false });
+  window.addEventListener("pointerup", end); window.addEventListener("pointercancel", end);
+  list.addEventListener("touchmove", e => { if (drag && drag.moved) e.preventDefault(); }, { passive: false });
+})();
 $("#cards").addEventListener("click", e => {
   const b = e.target.closest("button[data-act]"); const gid = equipoActivo(); if (!b || !gid) return;
   const g = grupo(gid), id = b.dataset.id;

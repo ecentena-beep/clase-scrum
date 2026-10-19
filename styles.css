@@ -122,7 +122,13 @@ td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
 .cards{list-style:none;margin:0;padding:0;display:grid;gap:8px}
 .card-h{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
 .card-h.sel{border-color:var(--ok);box-shadow:inset 4px 0 0 var(--ok)}
-.rank{font-family:var(--display);font-size:1.3rem;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.rank{font-family:var(--display);font-size:1.3rem;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums;display:grid;justify-items:center;gap:2px;cursor:grab;user-select:none}
+.grip{font-size:.8rem;letter-spacing:-2px;line-height:1;color:var(--line)}
+.card-h{touch-action:pan-y;cursor:grab}
+.card-h:active{cursor:grabbing}
+.card-h.placeholder{opacity:.35;border-style:dashed}
+.card-h.ghost{position:fixed;z-index:30;pointer-events:none;box-shadow:0 12px 32px rgba(0,0,0,.25);transform:rotate(1.5deg);opacity:.95}
+.readonly .card-h{cursor:default}
 .story .st-t{font-weight:800}
 .story p{color:var(--muted);font-size:.88rem}
 .ctrls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end}
